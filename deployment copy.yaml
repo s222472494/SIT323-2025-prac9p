@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-app
+  template:
+    metadata:
+      labels:
+        app: node-app
+    spec:
+      containers:
+        - name: node-container
+          image: s222472494/sit323_6.1p:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret   # This links to the secret you created
+                  key: mongo-uri       # The key you used for the MongoDB URI
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret   # This links to the secret for the MongoDB user
+                  key: mongo-user        # The key you used for the MongoDB username
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret   # This links to the secret for the MongoDB password
+                  key: mongo-password    # The key you used for the MongoDB password
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db  # MongoDB stores its data here inside the container
+      volumes:
+        - name: mongo-storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc    # This links to the PVC you created

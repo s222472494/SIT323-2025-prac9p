@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+
+  node-app:
+    build: .
+    container_name: node-app
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://admin:secret@mongo:27017/calculator
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+    command: ["npm", "start"]  # Ensure your app is started correctly
+    restart: always  # Optionally, ensure your app restarts on failure
+  
+volumes:
+  mongo-data:
